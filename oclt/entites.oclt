@@ -1,0 +1,564 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+entity DataStation {			// le fichier texte contenant les donnees meteorologiques
+  property String name
+  property Integer numero
+  property String dateTXT
+  property Double tempC
+  property Double tempMin
+  property Double tempMax
+  property Double rainMM
+  property Date date
+  
+  service getDate () {
+  	date = Date|fromString("dd/MM/yyyy",dateTXT)	
+  }
+  
+  service getTempMoy () {
+  	tempC = (tempMin + tempMax) / 2	
+  }
+  
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+entity LocStation {			// la localisation des stations meteorologiques
+ 	property String name
+ 	property Integer id
+ 	property Long numero
+ 	property Point geom
+ 	
+ 	service outputKml (Date begin, Date end, KmlExport kml){
+        let id = "Station " + name
+        let style= "Station" 
+        let deb = begin
+        let fin = end
+        kml.addGeometry (style,id, deb, fin, geom, style,0) 
+  	}
+ }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+entity TableModel { // La table des valeurs TNMOY42, RRLOGCUMULRAIN35, MODEL pour le modele statistique
+	property String tnmoy42
+	property String rrlogcumulrain35
+	property Double model
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+entity Parcelle {			// les parcelles de départ = zones alizes 
+	property String arrond // Arrondissement
+	property String commune // Commune
+	property Integer id // Identifiant
+	property String nom // Nom
+	property Integer kl // Capacite de charge : estimation par l'occupation du sol
+	property Double pop // total de la population dans la zone ALIZE
+	property MultiPolygon  geom
+	property String date_begin // for use with time manager plugin
+	property String date_end  //  in QGIS
+	property String nom_station  // Nom de la station meteo la plus proche
+	property Double dist_station // Distance a la station meteo la plus proche
+	property Integer id_station // Numero de station meteo la plus proche //identifiant interne
+	property Long num_station // Numero de station meteo la plus proche
+	
+	property Double r0 // Indice de R0
+	
+	
+	property Integer index_visite // Index de la visite de surveillance LAV
+	
+	
+	// Les variables du modele
+	property Double popS	// population humaine susceptible
+	property Double popE	// population humaine exposee
+	property Double popI	// population humaine infectee
+	property Double popR	// population humaine retablie
+	property Double comp_hum // competence "humaine"
+	property Double egg		// oeufs
+	property Double larvae	// larves
+	property Double pupae	// nymphes
+	property Double aem		// adultes femelles emergentes
+	property Double a1h		// adultes femelles nullipares en recherche d'hotes
+	property Double a1g		// total adultes femelles nullipares gravides
+	property Double a1gS	// a1g susceptibles
+	property Double a1gE	// a1g exposees
+	property Double a1gI	// a1g infectees
+	property Double a1o		// total adultes femelles nullipares en recherche de sites de ponte
+	property Double a1oS	// a1o susceptibles
+	property Double a1oE	// a1o exposees
+	property Double a1oI	// a1o infectees
+	property Double a2h		// total adultes femelles pares en recherche d'hotes
+	property Double a2hS	// a2h susceptibles
+	property Double a2hE	// a2h exposees
+	property Double a2hI	// a2h infectees
+	property Double a2g		// total adultes femelles pares gravides
+	property Double a2gS	// a2g susceptibles
+	property Double a2gE	// a2g exposees
+	property Double a2gI	// a2g infectess
+	property Double a2o		// total adultes femelles pares en recherche de sites de ponte
+	property Double a2oS	// a2o susceptibles
+	property Double a2oE	// a2o exposees
+	property Double a2oI	// a2o infectees
+	property Double ah		// a1h + a2h
+	property Double atot	// total des stades adultes
+	
+	// Les fonctions du modele : varient dans l'espace et le temps 
+	property Double fegg	// fonction de transition d'oeufs a larves
+	property Double flarvae	// fonction de transition de larves a nymphes
+	property Double fpupae	// fonction de transition de nymphes a adultes emergent
+	property Double fag		// fonction de transition ag -> ao
+	property Double fao		// fonction de transition ao -> ah
+	property Double fSE		// fonction de transition susceptible -> expose
+	property Double fEI		// fonction de transition expose -> infecte
+	property Double fme		// mortalite oeufs
+	property Double fml		// mortalite larves
+	property Double fmp		// mortalite nymphes
+	property Double fma		// mortalite adultes (tous les stades)
+	property Double fmaE	// mortalite des adultes exposes
+	property Double fmaI	// mortalite des adultes infectes
+	property Double fmurma	// mortalite adultes avec mortalite additionnelle (recherche hotes ou site de ponte)
+	property Double fmurmaE	// mortalite adultes exposes avec mortalite additionnelle
+	property Double fmurmaI	// mortalite adultes infectes avec mortalite additionnelle
+	property Double fkl		// capacite de charge de l'environnement larves
+	property Double fkp		// capacite de charge de l'environnement nymphes
+	property Double comp_vect // calcul de la competence vectorielle
+	property Double incub_extr // calcul de la duree d'incubation extrinseque
+	
+	
+	//property Integer classA2h // A2h values are classified for output 
+	property Integer classR0
+	
+	// La variable du modele stat
+	property Double larvae2
+	
+	// Les variables meteorologiques
+	property Double temperature // Temperature du jour
+	property Double rain // Pluie du jour
+	property Double rain7 // Pluie a j-7
+	property Double raincumul7 // Cumul des pluies sur 7 jours
+	property Integer rainday7 // Nombre de jours de pluie les 7 jours precedents
+	property Double raincumul35 // Cumul des pluies sur 35 jours
+	property String rrlogcumul35 // log du cumul de pluies des 35 derniers jours - en TXT pour comparaison avec table CSV de Morgan M.
+	property String tnmoy42 // moyenne des temperatures min des 42 derniers jours  - en TXT pour comparaison avec table CSV de Morgan M.
+	property Double rain35 // Pluie a j-35
+	property Double tn42 // Temperature min a j-42
+	property Double tmincumul42 // somme des temperatures min les 42 derniers jours
+	property Double tmin // Temperature min
+	property Double tmax // Temperature max
+	
+	service updateVariablesRain () {
+		raincumul7 = raincumul7 + rain -rain7
+		raincumul35 = raincumul35 + rain - rain35
+		rrlogcumul35 = format(log(raincumul35),"#.#")
+		if (rain>10) {rainday7 = rainday7 + 1}
+		if(rain7>10) {rainday7 = rainday7 - 1}
+	}
+	
+	service updateVariablesTemp () {
+		temperature = (tmin + tmax) / 2
+		tmincumul42 = tmincumul42 + tmin - tn42
+		tnmoy42 = format(tmincumul42 / 42, "#.#")
+	}
+	
+	service updateFunctions (Double temperature, Double rain) {
+		// Egg development
+		let TE = 10
+		let TDDE = 110 
+		if (temperature > TE) {
+			let fegg1 = (temperature - TE) 
+			fegg = fegg1/TDDE
+		}
+		if (fegg<0) {fegg=0.0}
+		
+		// Larvae development
+		let q1 = -0.0007
+		let q2 = 0.0392
+		let q3 = -0.3911
+		let flarvae1 = q1*temperature*temperature 
+		let flarvae2 = q2*temperature +q3
+		flarvae = flarvae1 + flarvae2
+		if (flarvae<0) {flarvae=0.0}
+		
+		// Pupae development
+		q1 = 0.0008
+		q2 = -0.0051
+		q3 = 0.0319
+		let fpupae1 = q1*temperature*temperature 
+		let fpupae2 = q2*temperature +q3
+		fpupae = fpupae1 + fpupae2
+		if (fpupae<0) {fpupae=0.0}
+		
+		// fAg
+		let TAg = 10
+		let TDDAg = 77
+		if (temperature > TAg) {
+			let fag1=(temperature-TAg)
+			fag = fag1/TDDAg
+		}
+		
+		//fAo
+		fao = 0.28*(raincumul7+1)/50
+		if (fao>0.28) {fao=0.28}
+
+		// Taux de mortalite des oeufs
+		fme = 0.05
+		if (rainday7 > 2) {fme=0.2}
+		//fme = 0.05 + 0.064*rainday7
+		
+		//Taux de mortalite des larves
+		let fml1 = exp((temperature-10)*0.1838)
+		fml = 0.0007 * fml1 + 0.02
+		
+		//Taux de mortalite des nymphes
+		let fmp1 = exp((temperature-10)*0.2228)
+		fmp = 0.0003 * fmp1 + 0.02
+		
+		// Effet lessivage sur les stades aquatiques
+		if (rain>80) {
+			fme = fme + 0.1
+			fml = fml + 0.5
+			fmp = fmp + 0.5
+		}
+		
+		//Taux de mortalite des adultes
+		let fma1 = exp((temperature-10)*0.1745)
+		fma = 0.0003 * fma1 + 0.025
+		if (fma<0.025) {fma=0.025}
+		
+		// Taux de mortalite des adultes exposes
+		fmaE = fma*2
+		
+		// Taux de mortalite des adultes infectes
+		fmaI = fma*2
+		
+		// Taux de mortalite en recherche d'hote
+		let mur = 0.08         // taux de mortalité additionnelle du comportement de recherche (d'hôtes et de sites de ponte)
+		fmurma = fma + mur
+		
+		// Taux de mortalite exposes en recherche d'hote
+		fmurmaE = fmaE + mur 
+		
+		// Taux de mortalite infectes en recherche d'hote
+		fmurmaI = fmaI + mur
+		
+		// capacite du milieu en larves
+		fkl = min(kl * (1+raincumul7/100), 2*kl)
+		
+		// capacite du milieu en nymphes
+		fkp = min(kl * (1+raincumul7/100), 2*kl)
+		
+		// calcul de la capacité vectorielle
+		comp_vect = ((-0.0043)*(temperature*temperature)+(0.2593*temperature)-3.2705)
+		
+		// calcul de la duree d'incubation extrinseque 
+		incub_extr = ((0.11*(temperature*temperature))-(7.13*temperature)+121.17)
+		
+		// calcul de la competence humaine
+		comp_hum = 0.75 //= comp_vect
+		
+									
+	} // Fin service updateFunctions
+	
+	service dynpop (Double dt) {
+		// Les parametres du modele
+		let b1 = 60 // nombre moyen d'oeufs des nullipares
+		let b2 = 80 // nombre moyen d'oeufs des pares
+		let sexr = 0.5  // sex ratio
+		let muPem = 0.1     // taux de mortalite à l'emergence (des P)
+		let devAh = 0.2 // taux de developpement des adultes en recherche d'hote
+		let devAhI = 2*devAh // taux de developpement des adultes infectes en recherche d'hote
+		println("comp_vect : " + comp_vect + ";")
+		println("egg : " + egg + ";")
+		println("larvae : " + larvae + ";")
+		println("popI : " + popI + ";")
+		let devAem = 1/2.5 // taux de developement des adultes emergents 
+		//transition fSE
+		let fSE = (comp_vect * devAh * popI) / pop
+		//transition fEI
+		let fEI = 1/incub_extr
+		println("fse : " + fSE + ";")
+		println("fei :" + fEI + ";")
+		//transition SE chez la population humaine
+		println("comp_hum : " + comp_hum + ";")
+		println("devAh : " + devAh + ";")
+		println("devAhI : " + devAhI + ";")
+		println("a2hI : " + a2hI + ";")
+		println("pop : " + pop + ";")	
+		println("pop infectée :" + popI + ";")
+		//let pop_m = a1h + a2hS + a2hE + a2hI
+		//calculAh()
+		println("ah: " + ah + ";")
+		let Double popdevSE = (comp_hum * devAhI * a2hI)/ah // /pop
+		println("popdevSE :" + popdevSE + ";")		
+		//transition EI chez la population humaine
+		fix Double popdevEI = 1.0/6.0 //*(0.75+(random()*0.5))
+		println("popdevEI :" + popdevEI + ";")
+		//transition IR chez population humaine
+		fix Double popdevIR = 1.0/5.0 //*(0.75+(random()*0.5))
+				
+		
+		let npastemps = round(1/dt).intValue() 
+		
+		// initialisation
+		let x1 = egg
+		let x2 = larvae
+		let x3 = pupae
+		let x4 = aem
+		let x5 = a1h
+		let x6S = a1gS
+		let x6E = a1gE
+		let x6I = a1gI
+		let x7S = a1oS
+		let x7E = a1oE
+		let x7I = a1oI
+		let x8S = a2hS
+		let x8E = a2hE
+		let x8I = a2hI
+		let x9S = a2gS
+		let x9E = a2gE
+		let x9I = a2gI
+		let x10S = a2oS
+		let x10E = a2oE
+		let x10I = a2oI
+		let x11S = popS
+		let x11E = popE
+		let x11I = popI
+		let x11R = popR  
+		
+		let k1 = 0.0
+ 		let l1 = 0.0
+		let m1 = 0.0
+		let n1 = 0.0
+		let o1 = 0.0
+		let p1 = 0.0
+		let p2 = 0.0
+		let p3 = 0.0
+		let q1 = 0.0
+		let q2 = 0.0
+		let q3 = 0.0
+		let r1 = 0.0
+		let r2 = 0.0
+		let r3 = 0.0
+		let s1 = 0.0
+		let s2 = 0.0
+		let s3 = 0.0
+		let t1 = 0.0
+		let t2 = 0.0
+		let t3 = 0.0
+		let u1 = 0.0
+		let u2 = 0.0
+		let u3 = 0.0
+		let u4 = 0.0
+		
+		// Resolution des equations
+		for (y : 1..npastemps) {
+			k1 = fao*(b1*round(x7S+x7E+x7I) + b2*round(x10S+x10E+x10I)) - x1*(fme + fegg)
+			let l1b = fml*(1.0+x2/fkl) + flarvae
+			l1 = fegg*x1 - x2*(l1b)
+			m1 = flarvae*x2 - x3*(fmp + fpupae)
+			let n1a = exp(-muPem*(1+x3/fkp)) 
+			n1 = fpupae * sexr * x3 * n1a - x4 * (fma + devAem)
+			o1 = devAem*x4 - x5*(fmurma + devAh)
+			p1 = devAh*x5 - x6S*(fma + fag + fSE)
+			p2 = fSE*x6S - x6E*(fmaE + fag + fEI)
+			p3 = fEI*x6E - x6I*(fmaI + fag)
+			q1 = fag*x6S - x7S*(fmurma + fao)
+			q2 = fag*x6E - x7E*(fmurmaE + fao + fEI)
+			q3 = fEI*x7E + fag*x6I - x7I*(fmurmaI + fao) 
+			r1 = fao*(x7S + x10S) - x8S*(fmurma + devAh)
+			r2 = fao*(x7E + x10E) - x8E*(fmurmaE + devAh)
+			r3 = fEI*x8E + fao*(x7I + x10I) - x8I*(fmurmaI + devAhI)
+			s1 = devAh*x8S - x9S*(fma + fag + fSE)
+			s2 = fSE*x9S + devAh*x8E - x9E*(fmaE + fag + fEI)
+			s3 = fEI*x9E + devAhI*x8I - x9I*(fmaI + fag)
+			t1 = fag*x9S - x10S*(fmurma + fao)
+			t2 = fag*x9E - x10E*(fmurmaE + fag + fEI)
+			t3 = fEI*x10E + fag*x9I - x9I*(fmurmaI+fag)
+			u1 = - x11S*popdevSE
+			u2 = x11S*popdevSE - x11E*popdevEI
+			u3 = x11E*popdevEI - x11I*popdevIR
+			u4 = x11I*popdevIR 
+			 
+			
+			let k = x1+ dt * k1
+			let l = x2+ dt * l1
+			let m = x3+ dt * m1
+			let n = x4+ dt * n1
+			let o = x5+ dt * o1
+			let p1b = x6S+ dt * p1
+			let p2b = x6E+ dt * p2
+			let p3b = x6I+ dt * p3
+			let q1b = x7S+ dt * q1
+			let q2b = x7E+ dt * q2
+			let q3b = x7I+ dt * q3 
+			let r1b = x8S+ dt * r1
+			let r2b = x9E+ dt * r2
+			let r3b = x9I+ dt * r3
+			let s1b = x9S+ dt * s1
+			let s2b = x9E+ dt * s2
+			let s3b = x9I+ dt * s3
+			let t1b = x10S+ dt * t1
+			let t2b = x10E+ dt * t2
+			let t3b = x10I+ dt * t3
+			let u1b = x11S+ dt * u1
+			let u2b = x11E+ dt * u2
+			let u3b = x11I+ dt * u3
+			let u4b = x11R+ dt * u4
+			
+			x1 = k
+			x2 = l
+			x3 = m
+			x4 = n
+			x5 = o
+			x6S = p1b
+			x6E = p2b
+			x6I = p3b
+			x7S = q1b
+			x7E = q2b
+			x7I = q3b
+			x8S = r1b
+			x8E = r2b
+			x8I = r3b
+			x9S = s1b
+			x9E = s2b
+			x9I = s3b
+			x10S = t1b
+			x10E = t2b
+			x10I = t3b
+			x11S = u1b
+			x11E = u2b
+			x11I = u3b
+			x11R = u4b
+		} // Fin boucle for
+		
+		egg = x1
+  		larvae = x2
+  		pupae = x3
+  		aem = x4
+  		a1h = x5
+  		a1gS = x6S
+  		a1gE = x6E
+  		a1gI = x6I
+  		a1oS = x7S
+  		a1oE = x7E
+  		a1oI = x7I
+  		a2hS = x8S
+  		a2hE = x8E
+  		a2hI = x8I
+  		a2gS = x9S
+  		a2gE = x9E
+  		a2gI = x9I
+  		a2oS = x10S
+  		a2oE = x10E
+  		a2oI = x10I
+  		//if (a2oI<0) {a2oI==0}
+  		popS = x11S
+  		popE = x11E
+  		popI = x11I
+  		popR = x11R
+		
+	} // Fin service dynpop
+	
+	service calculAtot () {
+		atot= aem + a1h + a1g + a1o + a2h + a2g + a2o
+	}
+	
+	service calculAh () {
+		ah = a1h + a2hS + a2hE + a2hI
+		println("a1h: " + a1h + " " + "a2hS: " + a2hS + " " + "a2hE: " + a2hE + " " + "a2hI: " + a2hI)
+	}
+	
+	service calculModel2 (List<TableModel> table) {
+		let test = false
+		let tabletemp = " "
+		let tablerain = " "
+		let i = 0
+		while (test==false && i<table.size()) {
+			tabletemp = table.get(i).tnmoy42
+			if (tabletemp == tnmoy42) {
+				tablerain = table.get(i).rrlogcumulrain35
+				if (tablerain == rrlogcumul35) {
+					test = true
+					larvae2 = table.get(i).model*1000 // coefficient 1000 pour comparaison model1
+				}
+			}
+			i = i+1
+		}
+	}
+	
+	//////////////////////////// DEBUT R0
+
+	
+	service Double calculR0 () {
+		//calculAtot()
+		//calculAh()
+		/*println(Parcelle.atot)*/
+		
+		let taux_survie = 1-((((atot-ah)*fma)+(ah*fmurma))/atot)
+		//let comp_vect = 0. // quasi-nulle en deça de 18°
+		//let incub_extr = 0 // valeur disuasive, en deça de 18%
+		//if (temperature > 18) {
+		let incub_extr = ((0.11*(temperature*temperature))-(7.13*temperature)+121.17) /* *(0.75+(random()*0.5))*/
+		let comp_vect = ((-0.0043)*(temperature*temperature)+(0.2593*temperature)-3.2705)/* *(0.75+(random()*0.5))*/
+		//}
+				
+		let taux_guer = (0.2)/**(0.75+(random()*0.5))*/ // fin d'infectiosité estimée à 5 jours
+		let devAh = 0.2
+		let capac_vect = ((atot/pop)*pow(((ah*devAh)/atot),2)*pow(taux_survie,incub_extr))/-(log(taux_survie))
+		let r0 = (comp_vect*capac_vect)/taux_guer
+		if (r0<0){r0=0}
+		/*println ("-------------------")
+		println ("id :" + id)
+		println(aem + ", " + a1h + ", " + a1g + ", " + a1o + ", " + a2h + ", " + a2g + ", " + a2o)
+		println("atot: " + atot)
+		println("ah: " + ah)
+		println("pop :" + pop)
+		println("temperature :" + temperature)
+		println("fma :" + fma)
+		println("fmurma :" + fmurma)
+		println("taux survie: " + taux_survie)
+		println("comp_vect: " + comp_vect)
+		println("capac_vect: " + capac_vect)
+		println("incub_extr: " + incub_extr)
+		println(r0)*/
+		return r0
+	}
+	
+	/////////////////////////// FIN R0
+	
+	service classify() {	// Classification of output a2h into 10 classes for display in KML file
+		/*if (a2h < 50) {classA2h = 1}
+		if (a2h >= 50 && a2h<100) {classA2h = 2}
+		if (a2h >= 100 && a2h<200) {classA2h = 3}
+		if (a2h >= 200 && a2h<300) {classA2h = 4}
+		if (a2h >= 300 && a2h<400) {classA2h = 5}
+		if (a2h >= 400 && a2h<500) {classA2h = 6}
+		if (a2h >= 500 && a2h<600) {classA2h = 7}
+		if (a2h >= 600 && a2h<700) {classA2h = 8}
+		if (a2h >= 800 && a2h<900) {classA2h = 9}
+		if (a2h >= 900 ) {classA2h = 10}*/
+		if (r0 < 0.41) {classR0 = 1}
+		if (r0 >= 0.41 && r0 < 0.82) {classR0 = 2}
+		if (r0 >= 0.82 && r0 < 1.34) {classR0 = 3}
+		if (r0 >= 1.34 && r0 < 2.21) {classR0 = 4}
+		if (r0 >= 2.21 && r0 < 4.39) {classR0 = 5}
+		if (r0 >= 4.39) {classR0 = 6}
+		
+		
+	} // Fin service classify
+	
+	service outputKml (Integer day, Date now, Integer frequencedisplay, KmlExport kml) {
+		let id = "Alize" + id + "_" + now.toString("yyyy-MM-dd")
+        let style= "R0_" + classR0 
+        let deb = now
+        let fin = now.clone
+        fin.addDays(frequencedisplay)
+        kml.addGeometry (style,id, deb, fin, geom, style,0) 
+	} // Fin service outputKml
+	
+	
+	
+} // Fin entite Parcelle
+
+entity DataSurveillance {
+	property Double nme			// nombre de maisons visitees
+	property Double nmtot		// nombre total de maisons
+	property Integer id
+	property String dateTXT
+}

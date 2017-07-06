@@ -1,0 +1,131 @@
+// Define datafacer for Shp import: parcels
+datafacer Shp {
+	data Shapefile("data/REFERENCE/SHAPEFILE/ZONESALIZES/Export_Output_Test.shp","EPSG:2975")	// RGR92_UTM_zone_40S
+	match Parcelle {
+		arrond : "ARROND"
+		commune : "COMMUNE"
+		id : "NUM_Z"
+		nom : "NOM"
+		kl : "KL"
+		pop : "pop_h"
+		geom : "geom"
+		}
+}
+
+// Define datafacer for Shp import: LocStation
+datafacer ShpStation {
+	data Shapefile("data/TRAVAIL/SHAPEFILE/STATIONS/Stations_meteo.shp","EPSG:2975")
+	match LocStation {
+		name : "NomStation"
+		numero : "Numero"
+		geom : "geom"
+		}
+}
+
+// Define datafacer for csv import: temperature and rainfall
+datafacer CsvData {
+  data Csvfile("data/TRAVAIL/CSVDATA/METEO/97401540.csv")
+  match DataStation {
+  	numero : "Numero"
+  	dateTXT : "Date"
+  	tempMin : "Tmin"
+  	tempMax : "Tmax"
+    rainMM : "Rain"
+	}
+}
+
+// Define datafacer for csv import: Table model
+datafacer CsvModel {
+	data Csvfile("data/TRAVAIL/CSVDATA/MODELE/Reunion_modele_complet_res.csv")
+	match TableModel {
+		tnmoy42 : "TN_moy_42"
+		rrlogcumulrain35 : "RR_log_cumul_35"
+		model : "Aedes_moy"
+	}
+}
+
+// Define datafacer for csv import: suurveillance data
+datafacer CsvSurveillanceData {
+	data Csvfile("data/TRAVAIL/CSVDATA/SURVEILLANCE/1.csv")
+	match DataSurveillance {
+		id : "num_z"
+		dateTXT : "date"
+		nme : "Me"
+		nmtot : "Mtot"
+	}
+}
+
+// Define datafacer for kml export
+datafacer KmlOut {
+	//data KmlExport(outputDir + "/"+region + "_serietemporelle.kml")
+	data KmlExport("output/REUNION_serietemporelle.kml")
+	match Parcelle {
+		geom : "geom"
+		nom : "nom"
+		r0 : "r0"
+		id : "id"
+	}
+}
+
+// Define datafacer for SHP export : toutes les dates
+datafacer ShpOutAllDates {
+	data Shapefile("output/REUNION_serietemporelle.shp","EPSG:2975")
+	match Parcelle {
+		geom : "geom"
+		id : "NUM_Z"
+		nom : "NOM"
+		num_station : "id_station"
+		date_begin : "date_debut"
+		date_end : "date_fin"
+		egg : "oeufs"
+		larvae : "larves"
+		pupae : "nymphes"
+		ah : "adultes_re"
+		a1h : "a1h"
+		a1gS : "a1gS"
+		a1gE : "a1gE"
+		a1gI : "a1gI"
+		a1oS : "a1oS"
+		a1oE : "a1oE"
+		a1oI : "a1oI"
+		a2hS : "a2hS"
+		a2hE : "a2hE"
+		a2hI : "a2hI"
+		a2gS : "a2gS"
+		a2gE : "a2gE"
+		a2gI : "a2gI"
+		a2oS : "a2oS"
+		a2oE : "a2oE"
+		a2oI : "a2oI"
+		atot : "adultes_to"
+		larvae2 : "larves2"
+		pop : "population"
+		popS : "pop_sens"
+		popE : "pop_expo"
+		popI : "pop_inf"
+		popR : "pop_ret"
+		//r0 : "r0"
+		
+	}
+}
+
+// Define datafacer for SHP export : une seule date
+datafacer ShpOut1Date {
+	data Shapefile("output/REUNION_01012013.shp","EPSG:2975") //01/01/2013
+	match Parcelle {
+		geom : "geom"
+		id : "NUM_Z"
+		nom : "NOM"
+		num_station : "id_station"
+		date_begin : "date_debut"
+		date_end : "date_fin"
+		egg : "oeufs"
+		larvae : "larves"
+		pupae : "nymphes"
+		ah : "adultes_rech"
+		atot : "adultes_tot"
+		larvae2 : "larves2"
+		pop : "population"
+		r0 : "r0"
+	}
+}
