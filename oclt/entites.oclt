@@ -266,7 +266,6 @@ entity Parcelle {			// les parcelles de départ = zones alizes
 		println("comp_vect : " + comp_vect + ";")
 		println("egg : " + egg + ";")
 		println("larvae : " + larvae + ";")
-		println("popI : " + popI + ";")
 		let devAem = 1/2.5 // taux de developement des adultes emergents 
 		//transition fSE
 		let fSE = (comp_vect * devAh * popI) / pop
@@ -274,6 +273,11 @@ entity Parcelle {			// les parcelles de départ = zones alizes
 		let fEI = 1/incub_extr
 		println("fse : " + fSE + ";")
 		println("fei :" + fEI + ";")
+		println("fma :" + fma + ";")
+		println("fmurmaE :" + fmurmaE + ";")
+		println("fmurmaI :" + fmurmaI + ";")
+		println("fmaE :" + fmaE + ";")
+		println("fmaI :" + fmaI + ";")
 		//transition SE chez la population humaine
 		println("comp_hum : " + comp_hum + ";")
 		println("devAh : " + devAh + ";")
@@ -284,7 +288,8 @@ entity Parcelle {			// les parcelles de départ = zones alizes
 		//let pop_m = a1h + a2hS + a2hE + a2hI
 		//calculAh()
 		println("ah: " + ah + ";")
-		let Double popdevSE = (comp_hum * devAhI * a2hI)/ah // /pop
+		if (ah == 0.0) {ah = 0.0000000000000000001}
+		let Double popdevSE = (comp_hum * devAhI * a2hI)/ah // /pop 
 		println("popdevSE :" + popdevSE + ";")		
 		//transition EI chez la population humaine
 		fix Double popdevEI = 1.0/6.0 //*(0.75+(random()*0.5))

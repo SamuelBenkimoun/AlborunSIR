@@ -58,10 +58,10 @@ public class ShpOutAllDates extends Shapefile {
     _entity.setProperty("atot",readDouble("adultes_to"));
     _entity.setProperty("larvae2",readDouble("larves2"));
     _entity.setProperty("pop",readDouble("population"));
-    _entity.setProperty("popS",readDouble("pop_sens"));
-    _entity.setProperty("popE",readDouble("pop_expo"));
-    _entity.setProperty("popI",readDouble("pop_inf"));
-    _entity.setProperty("popR",readDouble("pop_ret"));
+    _entity.setProperty("popS",readDouble("pop_S"));
+    _entity.setProperty("popE",readDouble("pop_E"));
+    _entity.setProperty("popI",readDouble("pop_I"));
+    _entity.setProperty("popR",readDouble("pop_R"));
     return _entity;
   }
   
@@ -96,10 +96,10 @@ public class ShpOutAllDates extends Shapefile {
     hm.put("adultes_to","java.lang.Double");
     hm.put("larves2","java.lang.Double");
     hm.put("population","java.lang.Double");
-    hm.put("pop_sens","java.lang.Double");
-    hm.put("pop_expo","java.lang.Double");
-    hm.put("pop_inf","java.lang.Double");
-    hm.put("pop_ret","java.lang.Double");
+    hm.put("pop_S","java.lang.Double");
+    hm.put("pop_E","java.lang.Double");
+    hm.put("pop_I","java.lang.Double");
+    hm.put("pop_R","java.lang.Double");
     return hm;
   }
   
@@ -140,10 +140,10 @@ public class ShpOutAllDates extends Shapefile {
                        odr.setAttribute("adultes_to",((Parcelle) ety).getAtot());
                        odr.setAttribute("larves2",((Parcelle) ety).getLarvae2());
                        odr.setAttribute("population",((Parcelle) ety).getPop());
-                       odr.setAttribute("pop_sens",((Parcelle) ety).getPopS());
-                       odr.setAttribute("pop_expo",((Parcelle) ety).getPopE());
-                       odr.setAttribute("pop_inf",((Parcelle) ety).getPopI());
-                       odr.setAttribute("pop_ret",((Parcelle) ety).getPopR());
+                       odr.setAttribute("pop_S",((Parcelle) ety).getPopS());
+                       odr.setAttribute("pop_E",((Parcelle) ety).getPopE());
+                       odr.setAttribute("pop_I",((Parcelle) ety).getPopI());
+                       odr.setAttribute("pop_R",((Parcelle) ety).getPopR());
     }
     return odr;
   }

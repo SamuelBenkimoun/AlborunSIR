@@ -193,6 +193,7 @@ kmlout.defStyleRange("R0_",1.0,plt,-0.2) // prefix, line thickness, list of colo
   	parc.a2hS = 0.0
   	parc.a2hE = 0.0
   	parc.a2hI = 0.0
+  	println("a2hI init " + parc.a2hI)
   	parc.a2g = 0.0
   	parc.a2gS = 0.0
   	parc.a2gE = 0.0
@@ -264,8 +265,8 @@ while (now.isBefore(edateuser.addDays(1))==true) {
 		
 		i = p.id_station
 		if (day==1173) { //808
-			p.popS = p.popS-1
-			p.popI = p.popI+1
+			p.popS = p.popS-1.0
+			p.popI = p.popI+1.0
 		}
       	
       	// Read temperature of the day

@@ -100,10 +100,10 @@ datafacer ShpOutAllDates {
 		atot : "adultes_to"
 		larvae2 : "larves2"
 		pop : "population"
-		popS : "pop_sens"
-		popE : "pop_expo"
-		popI : "pop_inf"
-		popR : "pop_ret"
+		popS : "pop_S"
+		popE : "pop_E"
+		popI : "pop_I"
+		popR : "pop_R"
 		//r0 : "r0"
 		
 	}

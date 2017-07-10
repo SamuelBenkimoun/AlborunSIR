@@ -261,6 +261,9 @@ public class ALBORUN extends AbstractModel {
         parc_1.setA2hS(Double.valueOf(0.0));
         parc_1.setA2hE(Double.valueOf(0.0));
         parc_1.setA2hI(Double.valueOf(0.0));
+        Double _a2hI = parc_1.getA2hI();
+        String _plus_10 = ("a2hI init " + _a2hI);
+        InputOutput.<String>println(_plus_10);
         parc_1.setA2g(Double.valueOf(0.0));
         parc_1.setA2gS(Double.valueOf(0.0));
         parc_1.setA2gE(Double.valueOf(0.0));
@@ -330,10 +333,10 @@ public class ALBORUN extends AbstractModel {
             i = (_id_station).intValue();
             if ((day == 1173)) {
               Double _popS = p.getPopS();
-              double _minus_1 = ((_popS).doubleValue() - 1);
+              double _minus_1 = ((_popS).doubleValue() - 1.0);
               p.setPopS(Double.valueOf(_minus_1));
               Double _popI = p.getPopI();
-              double _plus_11 = ((_popI).doubleValue() + 1);
+              double _plus_11 = ((_popI).doubleValue() + 1.0);
               p.setPopI(Double.valueOf(_plus_11));
             }
             List<DataStation> _get_7 = allMeteoData.get(Integer.valueOf(i));
